@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Potability Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="water-background">
+        <div class="wave wave1"></div>
+        <div class="wave wave2"></div>
+        <div class="wave wave3"></div>
+        <div class="wave wave4"></div>
+    </div>
+
+    <div class="container">
+        <div class="glass-card">
+
+            <h1>Water Potability <span class="highlight">Prediction</span></h1>
+            <p class="subtitle">Enter water quality parameters to assess potability</p>
+
+            <form action="/predict" method="post">
+
+                <div class="grid-form">
+
+                    <div class="input-group">
+                        <input type="text" name="ph" placeholder=" " id="ph" required>
+                        <label for="ph">pH Level</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="hardness" placeholder=" " id="hardness" required>
+                        <label for="hardness">Hardness</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="solids" placeholder=" " id="solids" required>
+                        <label for="solids">Solids (TDS)</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="chloramines" placeholder=" " id="chloramines" required>
+                        <label for="chloramines">Chloramines</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="sulfate" placeholder=" " id="sulfate" required>
+                        <label for="sulfate">Sulfate</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="conductivity" placeholder=" " id="conductivity" required>
+                        <label for="conductivity">Conductivity</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="organic_carbon" placeholder=" " id="organic_carbon" required>
+                        <label for="organic_carbon">Organic Carbon</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="trihalomethanes" placeholder=" " id="trihalomethanes" required>
+                        <label for="trihalomethanes">Trihalomethanes</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" name="turbidity" placeholder=" " id="turbidity" required>
+                        <label for="turbidity">Turbidity</label>
+                    </div>
+
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-predict">Predict Now</button>
+                    <button type="reset" class="btn-clear">Clear Form</button>
+                </div>
+
+            </form>
+
+            {% if prediction_text %}
+            <div class="result-container">
+                <h2 id="prediction-text" class="{{ status }}">{{ prediction_text }}</h2>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</body>
+</html>
