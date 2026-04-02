@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Potability Experience</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
+    <div class="ocean-scene" aria-hidden="true">
+        <div class="gradient-layer gradient-a"></div>
+        <div class="gradient-layer gradient-b"></div>
+        <div class="wave wave-1"></div>
+        <div class="wave wave-2"></div>
+        <div class="wave wave-3"></div>
+        <div class="particle-field" id="particleField"></div>
+    </div>
+
+    <div class="page-shell" id="pageShell">
+        <header class="intro" id="intro">
+            <p class="eyebrow">Water Intelligence Platform</p>
+            <h1>Test Your Water. Know Your Health.</h1>
+            <p class="subtext">
+                <span id="typingText"></span>
+                <span class="typing-caret" aria-hidden="true"></span>
+            </p>
+
+            <div class="word-rotator" aria-live="polite">
+                <span>Designed for </span>
+                <span id="changingWord" class="changing-word">Pure</span>
+                <span> decisions.</span>
+            </div>
+
+            <button class="droplet-core" id="dropletTrigger" type="button" data-target="{{ url_for('predictor') }}" aria-label="Start water prediction">
+                <span class="droplet-highlight"></span>
+                <span class="droplet-inner-text">Enter</span>
+                <span class="ripple-ring ripple-ring-1"></span>
+                <span class="ripple-ring ripple-ring-2"></span>
+            </button>
+
+            <div class="hero-actions">
+                <button class="glow-btn" id="startPredictionBtn" type="button" data-target="{{ url_for('predictor') }}">Start Prediction</button>
+                <a class="ghost-btn" href="{{ url_for('graphs') }}">View Data Insights</a>
+                <a class="ghost-btn" href="{{ url_for('info') }}">Learn Safety Basics</a>
+            </div>
+
+            <section class="stats-grid" aria-label="Key capability stats">
+                <article class="stat-card">
+                    <p class="stat-number" data-counter="9" data-suffix="">0</p>
+                    <p class="stat-label">Parameters Analyzed</p>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-number" data-counter="1" data-prefix="<" data-suffix="s">0</p>
+                    <p class="stat-label">Instant AI Prediction</p>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-number" data-counter="99" data-suffix="%">0</p>
+                    <p class="stat-label">Reliable Water Insights</p>
+                </article>
+            </section>
+        </header>
+
+        <section class="feature-grid" aria-label="Main features">
+            <article class="feature-card tilt-card">
+                <h3>Predict Water Quality</h3>
+                <p>Run your lab metrics through our trained model and get potability guidance in real-time.</p>
+            </article>
+            <article class="feature-card tilt-card">
+                <h3>View Data Insights</h3>
+                <p>Explore feature distributions, model signals, and trends that drive each prediction outcome.</p>
+            </article>
+            <article class="feature-card tilt-card">
+                <h3>Learn About Water Safety</h3>
+                <p>Understand each water parameter and why it matters for day-to-day drinking safety decisions.</p>
+            </article>
+        </section>
+
+        <section class="story story-1 reveal-on-scroll">
+            <h2>Why Water Quality Matters</h2>
+            <p>Every sip affects long-term health. Poor water quality can carry chemical and microbial risks that are not visible, measurable only through dependable analysis.</p>
+        </section>
+
+        <section class="story story-2 reveal-on-scroll">
+            <h2>How Our ML Model Works</h2>
+            <div class="steps">
+                <article class="step-card">
+                    <span class="step-icon">1</span>
+                    <p>Capture your 9 tested water parameters.</p>
+                </article>
+                <article class="step-card">
+                    <span class="step-icon">2</span>
+                    <p>Model evaluates feature interactions and risk thresholds.</p>
+                </article>
+                <article class="step-card">
+                    <span class="step-icon">3</span>
+                    <p>Receive immediate prediction with reliability cues.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="story story-3 reveal-on-scroll">
+            <h2>Ready to Check Your Water?</h2>
+            <p>Move from assumptions to evidence with a calm, guided prediction experience.</p>
+            <button class="glow-btn cta-large" type="button" data-target="{{ url_for('predictor') }}">Start Prediction</button>
+        </section>
+    </div>
+
+    <div class="transition-ripple" id="transitionRipple" aria-hidden="true"></div>
+
+    <script src="{{ url_for('static', filename='home.js') }}"></script>
+</body>
+</html>

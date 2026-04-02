@@ -3,92 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Water Potability Prediction</title>
+    <title>Water Potability Prediction Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-
 <body>
-
-    <div class="water-background">
-        <div class="wave wave1"></div>
-        <div class="wave wave2"></div>
-        <div class="wave wave3"></div>
-        <div class="wave wave4"></div>
+    <div class="ocean-bg" aria-hidden="true">
+        <div class="bg-glow glow-a"></div>
+        <div class="bg-glow glow-b"></div>
+        <div class="bg-wave wave-a"></div>
+        <div class="bg-wave wave-b"></div>
     </div>
 
-    <div class="container">
-        <div class="glass-card">
+    <main class="lab-shell">
+        <header class="lab-topbar">
+            <a href="{{ url_for('home') }}" class="nav-pill">Back Home</a>
+            <h1>Water Prediction Lab</h1>
+            <a href="{{ url_for('graphs') }}" class="nav-pill">Data Insights</a>
+        </header>
 
-            <h1>Water Potability <span class="highlight">Prediction</span></h1>
-            <p class="subtitle">Enter water quality parameters to assess potability</p>
-
-            <form action="/predict" method="post">
-
-                <div class="grid-form">
-
-                    <div class="input-group">
-                        <input type="text" name="ph" placeholder=" " id="ph" required>
-                        <label for="ph">pH Level</label>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="text" name="hardness" placeholder=" " id="hardness" required>
-                        <label for="hardness">Hardness</label>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="text" name="solids" placeholder=" " id="solids" required>
-                        <label for="solids">Solids (TDS)</label>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="text" name="chloramines" placeholder=" " id="chloramines" required>
-                        <label for="chloramines">Chloramines</label>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="text" name="sulfate" placeholder=" " id="sulfate" required>
-                        <label for="sulfate">Sulfate</label>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="text" name="conductivity" placeholder=" " id="conductivity" required>
-                        <label for="conductivity">Conductivity</label>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="text" name="organic_carbon" placeholder=" " id="organic_carbon" required>
-                        <label for="organic_carbon">Organic Carbon</label>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="text" name="trihalomethanes" placeholder=" " id="trihalomethanes" required>
-                        <label for="trihalomethanes">Trihalomethanes</label>
-                    </div>
-
-                    <div class="input-group">
-                        <input type="text" name="turbidity" placeholder=" " id="turbidity" required>
-                        <label for="turbidity">Turbidity</label>
-                    </div>
-
+        <section class="lab-layout">
+            <form action="/predict" method="post" id="predict-form" class="panel control-panel">
+                <div class="panel-head">
+                    <h2>Live Input Console</h2>
+                    <label class="sim-toggle" for="liveSimulation">
+                        <input id="liveSimulation" type="checkbox">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-label">Live Simulation Mode</span>
+                    </label>
                 </div>
 
-                <div class="button-group">
-                    <button type="submit" class="btn-predict">Predict Now</button>
-                    <button type="reset" class="btn-clear">Clear Form</button>
+                <p class="panel-subtext">Tune each parameter to simulate sample behavior. Sliders and values stay synchronized.</p>
+
+                <div class="controls-grid">
+                    <article class="control-card" data-param="ph">
+                        <div class="control-title"><label for="ph_slider">pH</label><button type="button" class="info-dot" data-tip="Acidity/alkalinity. Safe drinking water is typically near neutral." aria-label="About pH">i</button></div>
+                        <div class="range-meta"><span>0</span><span>14</span></div>
+                        <input id="ph_slider" class="range-input" type="range" min="0" max="14" step="0.01">
+                        <div class="value-row"><input id="ph" name="ph" class="value-input" type="number" min="0" max="14" step="0.001" value="{{ form_values.get('ph', '') }}" required><span class="status-chip">-</span></div>
+                    </article>
+
+                    <article class="control-card" data-param="hardness">
+                        <div class="control-title"><label for="hardness_slider">Hardness</label><button type="button" class="info-dot" data-tip="Calcium and magnesium concentration affecting taste and scaling." aria-label="About hardness">i</button></div>
+                        <div class="range-meta"><span>0</span><span>1500</span></div>
+                        <input id="hardness_slider" class="range-input" type="range" min="0" max="1500" step="0.1">
+                        <div class="value-row"><input id="hardness" name="hardness" class="value-input" type="number" min="0" max="1500" step="0.001" value="{{ form_values.get('hardness', '') }}" required><span class="status-chip">-</span></div>
+                    </article>
+
+                    <article class="control-card" data-param="solids">
+                        <div class="control-title"><label for="solids_slider">TDS (Solids)</label><button type="button" class="info-dot" data-tip="Total dissolved solids influence clarity and taste." aria-label="About solids">i</button></div>
+                        <div class="range-meta"><span>0</span><span>100000</span></div>
+                        <input id="solids_slider" class="range-input" type="range" min="0" max="100000" step="1">
+                        <div class="value-row"><input id="solids" name="solids" class="value-input" type="number" min="0" max="100000" step="0.001" value="{{ form_values.get('solids', '') }}" required><span class="status-chip">-</span></div>
+                    </article>
+
+                    <article class="control-card" data-param="chloramines">
+                        <div class="control-title"><label for="chloramines_slider">Chloramines</label><button type="button" class="info-dot" data-tip="Disinfection chemicals that must stay within acceptable limits." aria-label="About chloramines">i</button></div>
+                        <div class="range-meta"><span>0</span><span>50</span></div>
+                        <input id="chloramines_slider" class="range-input" type="range" min="0" max="50" step="0.01">
+                        <div class="value-row"><input id="chloramines" name="chloramines" class="value-input" type="number" min="0" max="50" step="0.001" value="{{ form_values.get('chloramines', '') }}" required><span class="status-chip">-</span></div>
+                    </article>
+
+                    <article class="control-card" data-param="sulfate">
+                        <div class="control-title"><label for="sulfate_slider">Sulfate</label><button type="button" class="info-dot" data-tip="High sulfate levels may affect taste and digestive comfort." aria-label="About sulfate">i</button></div>
+                        <div class="range-meta"><span>0</span><span>2000</span></div>
+                        <input id="sulfate_slider" class="range-input" type="range" min="0" max="2000" step="0.1">
+                        <div class="value-row"><input id="sulfate" name="sulfate" class="value-input" type="number" min="0" max="2000" step="0.001" value="{{ form_values.get('sulfate', '') }}" required><span class="status-chip">-</span></div>
+                    </article>
+
+                    <article class="control-card" data-param="conductivity">
+                        <div class="control-title"><label for="conductivity_slider">Conductivity</label><button type="button" class="info-dot" data-tip="Electrical conductivity indicates dissolved ion concentration." aria-label="About conductivity">i</button></div>
+                        <div class="range-meta"><span>0</span><span>5000</span></div>
+                        <input id="conductivity_slider" class="range-input" type="range" min="0" max="5000" step="0.1">
+                        <div class="value-row"><input id="conductivity" name="conductivity" class="value-input" type="number" min="0" max="5000" step="0.001" value="{{ form_values.get('conductivity', '') }}" required><span class="status-chip">-</span></div>
+                    </article>
+
+                    <article class="control-card" data-param="organic_carbon">
+                        <div class="control-title"><label for="organic_carbon_slider">Organic Carbon</label><button type="button" class="info-dot" data-tip="Organic residue can indicate contamination risk and treatment need." aria-label="About organic carbon">i</button></div>
+                        <div class="range-meta"><span>0</span><span>100</span></div>
+                        <input id="organic_carbon_slider" class="range-input" type="range" min="0" max="100" step="0.01">
+                        <div class="value-row"><input id="organic_carbon" name="organic_carbon" class="value-input" type="number" min="0" max="100" step="0.001" value="{{ form_values.get('organic_carbon', '') }}" required><span class="status-chip">-</span></div>
+                    </article>
+
+                    <article class="control-card" data-param="trihalomethanes">
+                        <div class="control-title"><label for="trihalomethanes_slider">Trihalomethanes</label><button type="button" class="info-dot" data-tip="Byproducts of chlorination that should remain controlled." aria-label="About trihalomethanes">i</button></div>
+                        <div class="range-meta"><span>0</span><span>1000</span></div>
+                        <input id="trihalomethanes_slider" class="range-input" type="range" min="0" max="1000" step="0.1">
+                        <div class="value-row"><input id="trihalomethanes" name="trihalomethanes" class="value-input" type="number" min="0" max="1000" step="0.001" value="{{ form_values.get('trihalomethanes', '') }}" required><span class="status-chip">-</span></div>
+                    </article>
+
+                    <article class="control-card" data-param="turbidity">
+                        <div class="control-title"><label for="turbidity_slider">Turbidity</label><button type="button" class="info-dot" data-tip="Cloudiness caused by suspended particles, a key quality signal." aria-label="About turbidity">i</button></div>
+                        <div class="range-meta"><span>0</span><span>1000</span></div>
+                        <input id="turbidity_slider" class="range-input" type="range" min="0" max="1000" step="0.1">
+                        <div class="value-row"><input id="turbidity" name="turbidity" class="value-input" type="number" min="0" max="1000" step="0.001" value="{{ form_values.get('turbidity', '') }}" required><span class="status-chip">-</span></div>
+                    </article>
                 </div>
 
+                <div class="control-actions">
+                    <button type="submit" class="btn-main" id="analyzeBtn">Analyze Water</button>
+                    <button type="button" class="btn-ghost" id="resetBtn">Reset</button>
+                </div>
             </form>
 
-            {% if prediction_text %}
-            <div class="result-container">
-                <h2 id="prediction-text" class="{{ status }}">{{ prediction_text }}</h2>
-            </div>
-            {% endif %}
+            <section class="panel results-panel" id="resultsPanel"
+                data-probability="{% if safe_probability is not none %}{{ '%.4f'|format(safe_probability) }}{% endif %}"
+                data-threshold="{% if decision_threshold is not none %}{{ '%.4f'|format(decision_threshold) }}{% endif %}"
+                data-status="{{ status if status else '' }}"
+                data-prediction="{{ prediction_text if prediction_text else '' }}">
 
-        </div>
-    </div>
+                <div class="viz-head">
+                    <h2>Live Water Chamber</h2>
+                    <p id="analyzingBadge" class="analyzing-badge">Analyzing<span class="dot-anim">...</span></p>
+                </div>
 
+                <div class="water-chamber-wrap">
+                    <div class="water-ripple" id="waterRipple"></div>
+                    <div class="chamber" id="waterChamber">
+                        <div class="chamber-reflect"></div>
+                        <div class="water-fill" id="waterFill">
+                            <div class="water-wave wave-one"></div>
+                            <div class="water-wave wave-two"></div>
+                            <div class="water-particles" id="waterParticles"></div>
+                            <div class="water-bubbles" id="waterBubbles"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-grid">
+                    <article class="glass-block score-block">
+                        <p class="block-title">Water Quality Score</p>
+                        <p class="score-number"><span id="scoreValue">0.0</span> / 10</p>
+                        <p class="score-label" id="scoreLabel">Analyzing</p>
+                    </article>
+
+                    <article class="glass-block impact-block">
+                        <p class="block-title">Parameter Impact Panel</p>
+                        <div id="impactList" class="impact-list"></div>
+                    </article>
+                </div>
+
+                <article class="glass-block insight-block">
+                    <p class="block-title">AI Insight Box</p>
+                    <p id="insightText">Adjust parameters or run analysis to generate AI insight.</p>
+                </article>
+
+                <article class="warning-box" id="warningBox" hidden>
+                    <span class="warning-icon">!</span>
+                    <p id="warningText"></p>
+                </article>
+
+                {% if prediction_text %}
+                <article class="server-result {{ status if status else 'unsafe' }}">
+                    {{ prediction_text }}
+                </article>
+                {% endif %}
+            </section>
+        </section>
+    </main>
+
+    <script>
+        window.serverPredictionPayload = {
+            predictionText: {{ (prediction_text if prediction_text is defined else None)|tojson }},
+            safeProbability: {{ (safe_probability if safe_probability is defined else None)|tojson }},
+            decisionThreshold: {{ (decision_threshold if decision_threshold is defined else None)|tojson }},
+            status: {{ (status if status is defined else None)|tojson }},
+            formValues: {{ (form_values if form_values is defined else {})|tojson }}
+        };
+    </script>
+    <script src="{{ url_for('static', filename='predict.js') }}"></script>
 </body>
 </html>

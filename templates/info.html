@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info - Water Potability Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --card-bg: rgba(255, 255, 255, 0.76);
+            --card-border: rgba(194, 233, 255, 0.7);
+            --card-shadow: 0 20px 34px -20px rgba(0, 24, 41, 0.48);
+            --title: #00589a;
+            --body: #1d4863;
+            --muted: #3f6f89;
+            --pill: #1874b8;
+        }
+
+        body {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 1.25rem;
+            color: var(--body);
+            overflow-x: hidden;
+        }
+
+        .water-background {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bg-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 18% 20%, rgba(109, 239, 255, 0.16), transparent 42%),
+                radial-gradient(circle at 82% 78%, rgba(18, 185, 211, 0.14), transparent 40%),
+                linear-gradient(rgba(2, 20, 33, 0.5), rgba(2, 24, 38, 0.78));
+        }
+
+        .info-wrap {
+            width: min(1100px, 100%);
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 1.3rem;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            margin-bottom: 1rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .header {
+            text-align: center;
+            padding: 1.6rem 1.2rem;
+        }
+
+        .header h1 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(1.9rem, 4vw, 3.05rem);
+            color: var(--title);
+            margin-bottom: 0.35rem;
+            letter-spacing: -0.02em;
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .tool-btn {
+            text-decoration: none;
+            color: #f3fbff;
+            padding: 0.68rem 1rem;
+            border-radius: 12px;
+            background: linear-gradient(140deg, #2189cf, #0c5f99);
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        h2 {
+            font-family: "Space Grotesk", sans-serif;
+            color: var(--title);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+            text-align: center;
+        }
+
+        p {
+            line-height: 1.65;
+        }
+
+        ul {
+            margin: 0.4rem auto 0;
+            padding-left: 1.1rem;
+            max-width: 900px;
+        }
+
+        li {
+            margin-bottom: 0.34rem;
+            line-height: 1.55;
+        }
+
+        .center-text {
+            text-align: center;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            gap: 0.78rem;
+            margin-top: 0.95rem;
+        }
+
+        .grid.two {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid.three {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .chip,
+        .card {
+            border-radius: 16px;
+            border: 1px solid rgba(175, 220, 245, 0.72);
+            background: rgba(244, 252, 255, 0.9);
+            padding: 0.92rem 0.95rem;
+            box-shadow: 0 10px 22px -16px rgba(2, 39, 64, 0.5);
+        }
+
+        .pipeline {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            background: var(--pill);
+            color: #fff;
+            padding: 0.47rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .result {
+            text-align: center;
+            color: var(--title);
+            font-family: "Space Grotesk", sans-serif;
+            font-size: clamp(2rem, 6vw, 3.1rem);
+            margin-top: 0.35rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.78rem;
+            margin-top: 0.9rem;
+        }
+
+        .stat {
+            text-align: center;
+            border-radius: 16px;
+            border: 1px solid rgba(175, 220, 245, 0.72);
+            background: rgba(244, 252, 255, 0.9);
+            padding: 0.95rem 0.8rem;
+        }
+
+        .stat strong {
+            display: block;
+            color: var(--title);
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 1.6rem;
+        }
+
+        .team {
+            text-align: center;
+            color: var(--body);
+            line-height: 1.7;
+        }
+
+        .footer {
+            text-align: center;
+            color: #d4eefc;
+            margin: 1.25rem 0 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .icon {
+            color: #0d6aab;
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .grid.two,
+            .grid.three,
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="water-background">
+        <video class="bg-video" autoplay muted loop playsinline>
+            <source src="{{ url_for('static', filename='sea_video.mp4') }}" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <main class="info-wrap">
+        <section class="section header reveal">
+            <h1>Water Potability Prediction</h1>
+            <p class="sub">Machine Learning using Random Forest</p>
+            <div class="toolbar">
+                <a href="{{ url_for('home') }}" class="tool-btn">Back Home</a>
+                <a href="{{ url_for('predictor') }}" class="tool-btn">Open Predictor</a>
+                <a href="{{ url_for('graphs') }}" class="tool-btn">View Graphs</a>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="droplets" class="icon"></i> Project Overview</h2>
+            <p class="center-text">
+                This project predicts whether water is safe for drinking using machine learning.
+                It analyzes chemical properties like pH, hardness, and dissolved solids to classify
+                water as potable or non-potable.
+            </p>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="target" class="icon"></i> Objectives</h2>
+            <div class="grid two">
+                <div class="card">Analyze water quality parameters</div>
+                <div class="card">Build ML classification model</div>
+                <div class="card">Improve prediction accuracy</div>
+                <div class="card">Improve prediction reliability for real use</div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="activity" class="icon"></i> Water Parameters</h2>
+            <div class="grid three">
+                <div class="chip">pH - acidity</div>
+                <div class="chip">Hardness - minerals</div>
+                <div class="chip">Solids - TDS</div>
+                <div class="chip">Chloramines</div>
+                <div class="chip">Sulfate</div>
+                <div class="chip">Conductivity</div>
+                <div class="chip">Organic Carbon</div>
+                <div class="chip">Trihalomethanes</div>
+                <div class="chip">Turbidity</div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="database" class="icon"></i> ML Pipeline</h2>
+            <div class="pipeline">
+                <span class="pill">Dataset</span>
+                <span class="pill">Preprocessing</span>
+                <span class="pill">Feature Engineering</span>
+                <span class="pill">Model</span>
+                <span class="pill">Prediction</span>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="table-properties" class="icon"></i> Dataset Snapshot</h2>
+            <div class="stats">
+                <div class="stat">
+                    <strong>5500</strong>
+                    Total Records
+                </div>
+                <div class="stat">
+                    <strong>2232</strong>
+                    Safe (Potable)
+                </div>
+                <div class="stat">
+                    <strong>3268</strong>
+                    Unsafe (Non-potable)
+                </div>
+            </div>
+            <p class="center-text" style="margin-top: 0.8rem;">
+                Source used by app: <code>expanded_5500_records.csv</code>. Inputs are 9 water-quality
+                features and output target is Potability (0/1).
+            </p>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="filter" class="icon"></i> Preprocessing & Validation</h2>
+            <ul>
+                <li>Missing values are handled with median-based filling before graph/model evaluation.</li>
+                <li>IQR clipping is used in analysis views to reduce outlier effect on distributions.</li>
+                <li>Physical range checks run at prediction time (example: pH must be between 0 and 14).</li>
+                <li>Training-range warning is shown when values are outside learned domain.</li>
+            </ul>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="brain" class="icon"></i> Model</h2>
+            <p class="center-text">
+                Random Forest combines multiple decision trees to improve accuracy and reduce
+                overfitting. It works well with complex datasets and provides reliable predictions.
+            </p>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="sliders-horizontal" class="icon"></i> Training & Tuning</h2>
+            <ul>
+                <li>Compared models: Baseline RF, GridSearchCV RF, and RandomizedSearchCV RF.</li>
+                <li>Best packaged model is loaded from <code>best_water_potability_model.pkl</code>.</li>
+                <li>Conservative safe threshold policy is applied (minimum decision threshold: 44%).</li>
+                <li>Goal: reduce unsafe-to-safe mistakes while keeping practical recall.</li>
+            </ul>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="bar-chart-3" class="icon"></i> Results</h2>
+            <p class="result">83% Accuracy</p>
+            <p class="center-text">GridSearchCV improved the performance of the model.</p>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="line-chart" class="icon"></i> Metrics & Insights</h2>
+            <ul>
+                <li>Evaluation focus includes Accuracy, Precision, Recall, and error balance.</li>
+                <li>Confusion matrix and model comparison are available in Graphs dashboard.</li>
+                <li>Feature importance and correlation views support explainability.</li>
+                <li>No single feature determines potability; combined signal drives prediction quality.</li>
+            </ul>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="rocket" class="icon"></i> Deployment & Impact</h2>
+            <ul>
+                <li>Live demo: <a href="https://ml-water-portability-1.onrender.com" target="_blank" rel="noopener">ml-water-portability-1.onrender.com</a></li>
+                <li>Useful for smart monitoring, public-health screening, and sustainability planning.</li>
+                <li>Frontend + model API makes prediction workflow fast and accessible.</li>
+            </ul>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="lightbulb" class="icon"></i> Future Scope</h2>
+            <ul>
+                <li>Real-time IoT sensor integration for continuous monitoring.</li>
+                <li>Explore advanced ensembles/deep models for improved generalization.</li>
+                <li>Add role-based dashboards and downloadable reports.</li>
+                <li>Expand with more geographic datasets for stronger robustness.</li>
+            </ul>
+        </section>
+
+        <section class="section reveal">
+            <h2><i data-lucide="users" class="icon"></i> Team</h2>
+            <div class="team">
+                <p>Jaymin Desai - Frontend & Visualization</p>
+                <p>Rutvik Mistry - Data Preprocessing</p>
+                <p>Rudra Prajapati - Model Training</p>
+            </div>
+        </section>
+
+        <p class="footer">(c) 2026 Water Potability Project</p>
+    </main>
+
+    <script>
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+            window.lucide.createIcons();
+        }
+
+        const sections = document.querySelectorAll(".reveal");
+        if ("IntersectionObserver" in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible");
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.14 });
+
+            sections.forEach((section) => observer.observe(section));
+        } else {
+            sections.forEach((section) => section.classList.add("visible"));
+        }
+    </script>
+</body>
+</html>

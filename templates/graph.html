@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Analytics Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='graph.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+    <div class="water-background">
+        <video class="bg-video" autoplay muted loop playsinline>
+            <source src="{{ url_for('static', filename='sea_video.mp4') }}" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+    <main class="container">
+        <section class="dashboard-card">
+            <div class="top-bar">
+                <div class="top-links">
+                    <a href="{{ url_for('home') }}" class="nav-link">&larr; Home</a>
+                    <a href="{{ url_for('predictor') }}" class="nav-link">Predictor</a>
+                </div>
+            </div>
+
+            <header class="hero">
+                <h1>Water Potability Full Graph Dashboard</h1>
+                {% if not error_message %}
+                <p>Dataset: <strong>{{ dataset_name }}</strong> | Records: <strong>{{ total_records }}</strong></p>
+                {% endif %}
+            </header>
+
+            {% if error_message %}
+            <p class="error">{{ error_message }}</p>
+            {% else %}
+            <section class="kpi-row">
+                <article class="kpi-card">
+                    <p class="kpi-label">Safe (1)</p>
+                    <p class="kpi-value safe">{{ safe_count }}</p>
+                </article>
+                <article class="kpi-card">
+                    <p class="kpi-label">Unsafe (0)</p>
+                    <p class="kpi-value unsafe">{{ unsafe_count }}</p>
+                </article>
+                <article class="kpi-card">
+                    <p class="kpi-label">Features</p>
+                    <p class="kpi-value">{{ feature_labels | length }}</p>
+                </article>
+                <article class="kpi-card">
+                    <p class="kpi-label">Distributions</p>
+                    <p class="kpi-value">{{ distribution_labels | length }}</p>
+                </article>
+            </section>
+
+            <section class="chart-grid">
+                <article class="chart-card"><h2>Confusion Matrix - Best Model</h2><div id="confusion-matrix" class="plot"></div></article>
+                <article class="chart-card"><h2>Accuracy Comparison of Random Forest Models</h2><div id="accuracy-comparison" class="plot"></div></article>
+                <article class="chart-card"><h2>Distribution of Potable vs Non-Potable Water</h2><div id="potability-distribution" class="plot"></div></article>
+                <article class="chart-card"><h2>Feature Importance - Random Forest</h2><div id="feature-importance" class="plot"></div></article>
+                <article class="chart-card full"><h2>Feature Correlation</h2><div id="correlation-heatmap" class="plot tall"></div></article>
+            </section>
+
+            <section class="group-section">
+                <h2>Original Feature Boxplots</h2>
+                <div class="small-grid">
+                    {% for col in feature_labels %}
+                    <article class="mini-card">
+                        <h3>{{ col }}</h3>
+                        <div id="orig-box-{{ loop.index0 }}" class="mini-plot"></div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="group-section">
+                <h2>Feature Distributions</h2>
+                <div class="small-grid">
+                    {% for col in distribution_labels %}
+                    <article class="mini-card">
+                        <h3>{{ col }}</h3>
+                        <div id="dist-{{ loop.index0 }}" class="mini-plot"></div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="group-section">
+                <h2>Cleaned Feature Boxplots</h2>
+                <div class="small-grid">
+                    {% for col in feature_labels %}
+                    <article class="mini-card">
+                        <h3>{{ col }}</h3>
+                        <div id="clean-box-{{ loop.index0 }}" class="mini-plot"></div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </section>
+    </main>
+
+    {% if not error_message %}
+    <script>
+        const payload = {{ graph_payload | tojson }};
+        const featureLabels = {{ feature_labels | tojson }};
+        const distributionLabels = {{ distribution_labels | tojson }};
+
+        const transparentBG = "rgba(0,0,0,0)";
+        const textColor = "#e6f5ff";
+        const gridColor = "rgba(173, 219, 238, 0.18)";
+        const config = { responsive: true, displayModeBar: false };
+
+        function applyTheme(layout) {
+            return {
+                ...layout,
+                paper_bgcolor: transparentBG,
+                plot_bgcolor: transparentBG,
+                font: { color: textColor, family: "Outfit, sans-serif" },
+                margin: { l: 45, r: 20, t: 18, b: 45, ...(layout.margin || {}) }
+            };
+        }
+
+        Plotly.newPlot("confusion-matrix", [{
+            z: payload.confusion_matrix,
+            x: ["Predicted 0", "Predicted 1"],
+            y: ["Actual 0", "Actual 1"],
+            type: "heatmap",
+            colorscale: "Blues",
+            text: payload.confusion_matrix,
+            texttemplate: "%{text}",
+            textfont: { color: "#f6fdff", size: 16 },
+            showscale: true
+        }], applyTheme({
+            xaxis: { gridcolor: gridColor },
+            yaxis: { gridcolor: gridColor, autorange: "reversed" }
+        }), config);
+
+        const accuracyNames = ["Baseline RF", "GridSearchCV RF", "RandomizedSearchCV RF"];
+        const accuracyValues = [0.827, 0.834, 0.828];
+        Plotly.newPlot("accuracy-comparison", [{
+            type: "bar",
+            x: accuracyNames,
+            y: accuracyValues,
+            marker: {
+                color: ["#2563eb", "#0ea5e9", "#14b8a6"],
+                line: { color: "#0f172a", width: 1.2 }
+            },
+            text: accuracyValues.map(v => v.toFixed(3)),
+            textposition: "outside"
+        }], {
+            paper_bgcolor: "#dbeafe",
+            plot_bgcolor: "#eff6ff",
+            font: { color: "#111111", family: "Outfit, sans-serif", size: 14 },
+            margin: { l: 55, r: 18, t: 18, b: 52 },
+            yaxis: {
+                range: [0, 1],
+                title: "Accuracy",
+                gridcolor: "rgba(37, 99, 235, 0.16)",
+                zeroline: false
+            },
+            xaxis: {
+                showgrid: false
+            }
+        }, config);
+
+        Plotly.newPlot("potability-distribution", [{
+            type: "bar",
+            x: ["0", "1"],
+            y: payload.potability_counts,
+            marker: { color: ["#f87171", "#4ade80"] }
+        }], applyTheme({
+            xaxis: { title: "Potability", gridcolor: gridColor },
+            yaxis: { title: "Count", gridcolor: gridColor }
+        }), config);
+
+        Plotly.newPlot("feature-importance", [{
+            type: "bar",
+            x: payload.feature_importance_values,
+            y: payload.feature_importance_labels,
+            orientation: "h",
+            marker: { color: "#38bdf8" }
+        }], applyTheme({
+            xaxis: { title: "Importance", gridcolor: gridColor },
+            yaxis: { automargin: true, categoryorder: "array", categoryarray: payload.feature_importance_labels.slice().reverse() }
+        }), config);
+
+        Plotly.newPlot("correlation-heatmap", [{
+            z: payload.correlation_matrix,
+            x: payload.correlation_labels,
+            y: payload.correlation_labels,
+            type: "heatmap",
+            colorscale: "RdBu",
+            zmid: 0,
+            text: payload.correlation_matrix,
+            texttemplate: "%{text:.2f}",
+            textfont: { size: 11, color: "#ffffff" }
+        }], applyTheme({
+            margin: { l: 80, r: 30, t: 10, b: 90 },
+            xaxis: { tickangle: -45 },
+            yaxis: { autorange: "reversed" }
+        }), config);
+
+        featureLabels.forEach((label, i) => {
+            Plotly.newPlot(`orig-box-${i}`, [{
+                type: "box",
+                y: payload.original_box_data[i],
+                boxmean: true,
+                marker: { color: "#38bdf8" },
+                line: { color: "#7dd3fc" }
+            }], applyTheme({
+                margin: { l: 42, r: 12, t: 10, b: 30 },
+                yaxis: { gridcolor: gridColor },
+                xaxis: { showticklabels: false }
+            }), config);
+        });
+
+        distributionLabels.forEach((label, i) => {
+            Plotly.newPlot(`dist-${i}`, [{
+                type: "histogram",
+                x: payload.distribution_data[i],
+                marker: { color: "#22d3ee" },
+                nbinsx: label === "Potability" ? 2 : 15
+            }], applyTheme({
+                margin: { l: 42, r: 12, t: 10, b: 30 },
+                xaxis: { gridcolor: gridColor },
+                yaxis: { gridcolor: gridColor }
+            }), config);
+        });
+
+        featureLabels.forEach((label, i) => {
+            Plotly.newPlot(`clean-box-${i}`, [{
+                type: "box",
+                y: payload.cleaned_box_data[i],
+                boxmean: true,
+                marker: { color: "#4ade80" },
+                line: { color: "#86efac" }
+            }], applyTheme({
+                margin: { l: 42, r: 12, t: 10, b: 30 },
+                yaxis: { gridcolor: gridColor },
+                xaxis: { showticklabels: false }
+            }), config);
+        });
+    </script>
+    {% endif %}
+</body>
+</html>
